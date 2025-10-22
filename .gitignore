@@ -45,3 +45,7 @@ outputs/
 results/
 saved_models/
 
+# Virtual environment
+venv/
+.venv/
+env/

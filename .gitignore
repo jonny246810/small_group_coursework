@@ -1,5 +1,9 @@
-# Dataset 
-PlantVillage_dataset/
+data/
+outputs/
+checkpoints/
+logs/
+runs/
+models/
 
 # Python
 __pycache__/

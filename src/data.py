@@ -1,6 +1,7 @@
 from datasets import load_dataset
 from torch.utils.data import random_split
 import torch
+from torchvision import transforms
 
 class PlantVillageDataLoader:
     def __init__(self):
@@ -32,14 +33,26 @@ class PlantVillageDataLoader:
         )
 
         return train_ds, val_ds, test_ds
+    
+    def get_base_transform(self):
+        return transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406],
+                    std=[0.229, 0.224, 0.225]
+                )
+            ])
         
 
         
 
 if __name__ == "__main__":
     loader = PlantVillageDataLoader()
-    ds = loader.load_data()
-    print(f"Full train: {len(ds['train'])}")
-
-    train, val, test = loader.get_subset_split()
-    print(f"Subset split: {len(train)} / {len(val)} / {len(test)}")
+    ds = loader.load_data()["train"]
+    
+    transform = loader.get_base_transform()
+    sample = ds[0]
+    img = sample["image"]
+    tensor = transform(img)
+    print(f"Shape: {tensor.shape}, Mean: {tensor.mean():.3f}, Std: {tensor.std():.3f}")
+    

@@ -49,3 +49,5 @@ saved_models/
 venv/
 .venv/
 env/
+
+*.env

@@ -7,10 +7,18 @@ import torch
 class PlantVillageDataLoader:
     def __init__(self):
         self.dataset_name = "DScomp380/plant_village"
+        self.class_names = None
 
     def load_data(self):
         dataset = load_dataset(self.dataset_name)
         return dataset
+    
+    def get_class_names(self):
+        if self.class_names is None:
+            dataset = self.load_data()
+            label_feature = dataset["train"].features["label"]
+            self.class_names = label_feature.names
+        return self.class_names
     
     def get_subset_split(self, fraction=0.3, seed=42):
         dataset = self.load_data()
@@ -53,7 +61,6 @@ class PlantVillageDataLoader:
         labels = torch.tensor([item["label"] for item in batch])
         return {"image": images, "label": labels}
     
-        
     def get_dataloaders(self, batch_size=64, num_workers=5):
         train_ds, val_ds, test_ds = self.get_subset_split()
 
@@ -68,9 +75,16 @@ class PlantVillageDataLoader:
 
 if __name__ == "__main__":
     loader = PlantVillageDataLoader()
+    
+    # Get class names first
+    class_names = loader.get_class_names()
+    print(f"Number of classes: {len(class_names)}")
+    print("Class names:", class_names)
+    
+    # Then get dataloaders
     loaders = loader.get_dataloaders(batch_size=64)
     
-    print("Testing dataloaders...")
+    print("\nTesting dataloaders...")
     batch = next(iter(loaders["train"]))
     print(f"Batch image shape: {batch['image'].shape}")
     print(f"Batch labels shape: {batch['label'].shape}")

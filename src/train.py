@@ -33,6 +33,7 @@ class Trainer:
         
         pbar = tqdm(self.train_loader, desc="Training")
         for batch in pbar:
+            # Data is already augmented by the dataloader
             images = batch["image"].to(self.device)
             labels = batch["label"].to(self.device)
             
@@ -96,6 +97,10 @@ class Trainer:
     
     def train(self):
         print(f"Training for {self.num_epochs} epochs...")
+        print("Data augmentation is enabled for training set.")
+        print("Augmentations: horizontal flip (p=0.5), rotation (±10°), brightness/contrast (±0.2)")
+        print()
+        
         best_val_acc = 0.0
         early_stopping = EarlyStopping(patience=3, min_delta=0.001)
         
@@ -144,7 +149,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
-    # Load data
+    # Load data with augmentation
     data_loader = PlantVillageDataLoader()
     loaders = data_loader.get_dataloaders(batch_size=64, num_workers=4)
     class_names = data_loader.get_class_names()

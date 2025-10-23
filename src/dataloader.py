@@ -52,11 +52,37 @@ class PlantVillageDataLoader:
         ])
     
     def get_train_transform(self):
-        #filler - can be extended for data augmentation
-        return self.get_base_transform()
+        return transforms.Compose([
+            transforms.Resize((256, 256)),
+            
+            # Geometric augmentations
+            transforms.RandomHorizontalFlip(p=0.5),  # Flip chance = 0.5
+            # transforms.RandomVerticalFlip(p=0.0),  # Disabled by default
+            transforms.RandomRotation(degrees=10),  # Rotation +-10 degrees
+            # transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)), 
+            
+            # Color augmentations
+            transforms.ColorJitter(
+                brightness=0.2,  # Brightness +-0.2
+                contrast=0.2,    # Contrast +-0.2
+                saturation=0.0,  # Disabled (set to 0.2 to enable)
+                hue=0.0          # Disabled (set to 0.1 to enable)
+            ),
+            
+            # Optional: Additional augmentations
+            # transforms.RandomGrayscale(p=0.0),  # Convert to grayscale occasionally
+            # transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),  # Blur
+            # transforms.RandomPerspective(distortion_scale=0.2, p=0.0),  # Perspective transform
+            
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406],
+                std=[0.229, 0.224, 0.225]
+            )
+        ])
     
-    def prepare_batch(self, batch):
-        transform = self.get_base_transform()
+    def prepare_batch(self, batch, use_augmentation=False):
+        transform = self.get_train_transform() if use_augmentation else self.get_base_transform()
         images = torch.stack([transform(item["image"]) for item in batch])
         labels = torch.tensor([item["label"] for item in batch])
         return {"image": images, "label": labels}
@@ -64,14 +90,35 @@ class PlantVillageDataLoader:
     def get_dataloaders(self, batch_size=64, num_workers=4):
         train_ds, val_ds, test_ds = self.get_subset_split()
 
-        train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, 
-                                num_workers=num_workers, collate_fn=self.prepare_batch)
-        val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, 
-                            num_workers=num_workers, collate_fn=self.prepare_batch)
-        test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False, 
-                                num_workers=num_workers, collate_fn=self.prepare_batch)
+        # Training loader with augmentation
+        train_loader = DataLoader(
+            train_ds, 
+            batch_size=batch_size, 
+            shuffle=True, 
+            num_workers=num_workers, 
+            collate_fn=lambda batch: self.prepare_batch(batch, use_augmentation=True)
+        )
+        
+        # Validation loader without augmentation
+        val_loader = DataLoader(
+            val_ds, 
+            batch_size=batch_size, 
+            shuffle=False, 
+            num_workers=num_workers, 
+            collate_fn=lambda batch: self.prepare_batch(batch, use_augmentation=False)
+        )
+        
+        # Test loader without augmentation
+        test_loader = DataLoader(
+            test_ds, 
+            batch_size=batch_size, 
+            shuffle=False, 
+            num_workers=num_workers, 
+            collate_fn=lambda batch: self.prepare_batch(batch, use_augmentation=False)
+        )
 
         return {"train": train_loader, "val": val_loader, "test": test_loader}
+
 
 if __name__ == "__main__":
     loader = PlantVillageDataLoader()
@@ -91,3 +138,6 @@ if __name__ == "__main__":
     print(f"Train batches: {len(loaders['train'])}")
     print(f"Val batches: {len(loaders['val'])}")
     print(f"Test batches: {len(loaders['test'])}")
+    
+    print("\nAugmentation is applied to training data only.")
+    print("Val and test loaders use base transforms without augmentation.")

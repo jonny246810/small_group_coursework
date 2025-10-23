@@ -31,7 +31,7 @@ class PlantCNN(nn.Module):
         self.pool5 = nn.MaxPool2d(2, 2)
         
         # Single dense layer: 8x8x128 to 39 neuron
-        self.fc = nn.Linear(8 * 8 * 128, num_classes)
+        self.fc = nn.Linear(8 * 8 * 128, num_classes) #GAP - average go 1x1x128. maybe 1x1x256
         
         self.relu = nn.ReLU()
         

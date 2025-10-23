@@ -4,7 +4,7 @@ import torch.optim as optim
 from tqdm import tqdm
 from model import PlantCNN
 from dataloader import PlantVillageDataLoader
-from utils import plot_training_curves, get_classification_report
+from utils import plot_training_curves, plot_confusion_matrix, get_classification_report
 
 
 class Trainer:

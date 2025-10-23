@@ -61,7 +61,7 @@ class PlantVillageDataLoader:
         labels = torch.tensor([item["label"] for item in batch])
         return {"image": images, "label": labels}
     
-    def get_dataloaders(self, batch_size=64, num_workers=5):
+    def get_dataloaders(self, batch_size=64, num_workers=4):
         train_ds, val_ds, test_ds = self.get_subset_split()
 
         train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, 

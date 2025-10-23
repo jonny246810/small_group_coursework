@@ -4,7 +4,7 @@ import torch.optim as optim
 from tqdm import tqdm
 from model import PlantCNN
 from dataloader import PlantVillageDataLoader
-from utils import plot_training_curves, plot_confusion_matrix, get_classification_report
+from utils import plot_training_curves, plot_confusion_matrix, get_classification_report, EarlyStopping
 
 
 class Trainer:
@@ -97,6 +97,7 @@ class Trainer:
     def train(self):
         print(f"Training for {self.num_epochs} epochs...")
         best_val_acc = 0.0
+        early_stopping = EarlyStopping(patience=3, min_delta=0.001)
         
         for epoch in range(self.num_epochs):
             print(f"\nEpoch {epoch+1}/{self.num_epochs}")
@@ -116,6 +117,11 @@ class Trainer:
                 best_val_acc = val_acc
                 torch.save(self.model.state_dict(), 'best_model.pth')
                 print(f"Saved best model (val acc: {val_acc:.2f}%)")
+            
+            early_stopping(val_loss)
+            if early_stopping.early_stop:
+                print(f"Early stopping triggered at epoch {epoch+1}")
+                break
         
         print(f"\nBest validation accuracy: {best_val_acc:.2f}%")
         
@@ -161,7 +167,7 @@ def main():
     
     # Generate evaluation
     print("\n" + "="*60)
-    print("Generating evaluation...")
+    print("Generating evaluation.")
     
     plot_training_curves(results, save_path='training_curves.png')
     plot_confusion_matrix(model, loaders["test"], class_names, device, 

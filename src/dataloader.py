@@ -68,12 +68,8 @@ class PlantVillageDataLoader:
                 saturation=0.0,  # Disabled (set to 0.2 to enable)
                 hue=0.0          # Disabled (set to 0.1 to enable)
             ),
-            
-            # Optional: Additional augmentations
-            # transforms.RandomGrayscale(p=0.0),  # Convert to grayscale occasionally
-            # transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),  # Blur
-            # transforms.RandomPerspective(distortion_scale=0.2, p=0.0),  # Perspective transform
-            
+
+
             transforms.ToTensor(),
             transforms.Normalize(
                 mean=[0.485, 0.456, 0.406],

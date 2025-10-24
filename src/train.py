@@ -1,3 +1,10 @@
+from clearml import Task
+
+task = Task.init(
+    project_name="Plant Disease Classification",
+    task_name="cnn_training",
+)
+
 import torch
 import torch.nn as nn
 import torch.optim as optim

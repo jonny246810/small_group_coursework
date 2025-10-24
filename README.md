@@ -1,1 +1,1 @@
-# small_group_coursework
+# Plant disease classification
